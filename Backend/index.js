@@ -6,83 +6,76 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const connectDB = require("./config/db");
+
 const authRoutes = require("./routes/auth.route");
 const adminRoutes = require("./routes/admin.route");
 const projectRoutes = require("./routes/project.route");
-const errorMiddleware =
-    require("./middleware/error.middleware");
-const taskroutes=require("./routes/task.routes");
+const taskRoutes = require("./routes/task.routes");
 const dashboardRoutes = require("./routes/dashboard.route");
 
-const app = express();
+const errorMiddleware = require("./middleware/error.middleware");
 
+const app = express();
 
 // ==============================
 // Middleware
 // ==============================
 
 app.use(express.json());
-app.use(cors());
 
+app.use(
+    cors({
+        origin: process.env.FRONTEND_URL || "*",
+        credentials: true
+    })
+);
 
 // ==============================
 // Routes
 // ==============================
 
 app.use("/api/auth", authRoutes);
-
 app.use("/api/admin", adminRoutes);
 app.use("/api/projects", projectRoutes);
-app.use("/api/tasks",taskroutes);
+app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-
 
 // ==============================
 // Static Files
 // ==============================
+
 app.use(
     "/uploads",
-    express.static(
-        path.join(__dirname, "uploads")
-    )
+    express.static(path.join(__dirname, "uploads"))
 );
-
 
 // ==============================
 // Test Route
 // ==============================
 
 app.get("/", (req, res) => {
-    res.send("Hello World!");
+    res.json({
+        success: true,
+        message: "BharatSetu Backend is running!"
+    });
 });
+
+// ==============================
+// Error Middleware
+// ==============================
 
 app.use(errorMiddleware);
 
+// ==============================
+// Database Connection
+// ==============================
+
+connectDB().catch((error) => {
+    console.error("MongoDB connection failed:", error.message);
+});
 
 // ==============================
-// Start Server
+// Export App
 // ==============================
 
-const PORT = process.env.PORT || 7000;
-
-const startServer = async () => {
-    try {
-
-        await connectDB();
-
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-
-    } catch (error) {
-
-        console.error(
-            "Failed to start server:",
-            error.message
-        );
-
-        process.exit(1);
-    }
-};
-
-startServer();
+module.exports = app;
