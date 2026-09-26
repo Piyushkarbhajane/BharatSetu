@@ -17,22 +17,37 @@ const errorMiddleware = require("./middleware/error.middleware");
 
 const app = express();
 
-// ==============================
-// Middleware
-// ==============================
+// ========================================
+// MIDDLEWARE
+// ========================================
 
 app.use(express.json());
 
 app.use(
     cors({
-        origin: process.env.FRONTEND_URL || "*",
-        credentials: true
+        origin: process.env.FRONTEND_URL,
+        credentials: true,
     })
 );
 
-// ==============================
-// Routes
-// ==============================
+// ========================================
+// DATABASE CONNECTION
+// ========================================
+
+connectDB()
+    .then(() => {
+        console.log("MongoDB connected successfully");
+    })
+    .catch((error) => {
+        console.error(
+            "MongoDB connection failed:",
+            error.message
+        );
+    });
+
+// ========================================
+// ROUTES
+// ========================================
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
@@ -40,42 +55,36 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-// ==============================
-// Static Files
-// ==============================
+// ========================================
+// STATIC FILES
+// ========================================
 
 app.use(
     "/uploads",
-    express.static(path.join(__dirname, "uploads"))
+    express.static(
+        path.join(__dirname, "uploads")
+    )
 );
 
-// ==============================
-// Test Route
-// ==============================
+// ========================================
+// TEST ROUTE
+// ========================================
 
 app.get("/", (req, res) => {
-    res.json({
+    res.status(200).json({
         success: true,
-        message: "BharatSetu Backend is running!"
+        message: "BharatSetu Backend is running!",
     });
 });
 
-// ==============================
-// Error Middleware
-// ==============================
+// ========================================
+// ERROR HANDLER
+// ========================================
 
 app.use(errorMiddleware);
 
-// ==============================
-// Database Connection
-// ==============================
-
-connectDB().catch((error) => {
-    console.error("MongoDB connection failed:", error.message);
-});
-
-// ==============================
-// Export App
-// ==============================
+// ========================================
+// EXPORT APP FOR VERCEL
+// ========================================
 
 module.exports = app;

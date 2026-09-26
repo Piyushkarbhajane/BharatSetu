@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import './App.css'
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:7000/api' })
+const api = axios.create({
+  baseURL: `${import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:7000'}/api`
+})
 const statuses = { todo: 'To do', 'in-progress': 'In progress', completed: 'Completed' }
 
 function App() {
